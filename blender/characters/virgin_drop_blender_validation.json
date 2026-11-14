@@ -1,0 +1,31 @@
+{
+  "fingerprint": "b2bf1202eae053aa5fb6cab3c97bcaecd9a35d17887d91209d82e2a3d5275616",
+  "vertices": 242,
+  "triangles": 428,
+  "clips": {
+    "Walk": {
+      "duration": 0.7,
+      "first_neutral_error": 0.0,
+      "last_neutral_error": 0.0,
+      "minimum_z": 0.0,
+      "loop_position_error": 0.0,
+      "first_0_001_frame_motion": 0.0,
+      "last_0_001_frame_motion": 0.0
+    },
+    "Attack": {
+      "duration": 0.5,
+      "first_neutral_error": 0.0,
+      "last_neutral_error": 0.0,
+      "minimum_z": 0.0
+    },
+    "Death": {
+      "duration": 1.2,
+      "first_neutral_error": 0.0,
+      "last_neutral_error": 0.9638692893012107,
+      "minimum_z": 0.0,
+      "puddle_height": 0.03799998760223389,
+      "puddle_width": 1.483839988708496,
+      "last_three_frame_delta": 0.0
+    }
+  }
+}

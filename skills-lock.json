@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "skills": {
+    "blender-export": {
+      "source": "RobLe3/cc-blender-skill",
+      "sourceType": "github",
+      "skillPath": "plugin/skills/blender-export/SKILL.md",
+      "computedHash": "70681ceed0e40faf55bb3c603ad1c41972e3deed35aa1c3285aa4dc307fd9bec"
+    },
+    "lowpoly-style": {
+      "source": "arjun988/blender-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/lowpoly-style/SKILL.md",
+      "computedHash": "7fc2335bd79496dfbd32de8f74d7500814895c0f80a3e7ceba8447b10a816255"
+    },
+    "text-to-blender": {
+      "source": "RobLe3/cc-blender-skill",
+      "sourceType": "github",
+      "skillPath": "plugin/skills/text-to-blender/SKILL.md",
+      "computedHash": "711ddcb1f3b804f321e022712b1b2962e3b68f701f986046901c5a8deb5ddf31"
+    },
+    "unity-cli": {
+      "source": "Unity-Technologies/skills",
+      "sourceType": "github",
+      "skillPath": "skills/unity-cli/SKILL.md",
+      "computedHash": "edf7d5b2ad7f8b6f3d54e2ad45329c65523c53685cd59ae399c492249967c357"
+    }
+  }
+}

@@ -1,0 +1,240 @@
+{
+  "sampling": {
+    "clips": [
+      {
+        "name": "Walk",
+        "seconds": 0.700000048,
+        "loop": true,
+        "beginError": 0,
+        "endError": 0,
+        "minY": 0,
+        "maximumMovement": 0.2403239,
+        "endHeight": 1,
+        "heldDelta": 0.04805318,
+        "curves": [
+          {
+            "name": "blendShape.Walk_Stretch",
+            "min": 0,
+            "max": 100
+          },
+          {
+            "name": "blendShape.Walk_Gather",
+            "min": 0,
+            "max": 99.99999
+          },
+          {
+            "name": "blendShape.Attack_Anticipate",
+            "min": 0,
+            "max": 0
+          },
+          {
+            "name": "blendShape.Attack_Lunge",
+            "min": 0,
+            "max": 0
+          },
+          {
+            "name": "blendShape.Death_Soften",
+            "min": 0,
+            "max": 0
+          },
+          {
+            "name": "blendShape.Death_Puddle",
+            "min": 0,
+            "max": 0
+          }
+        ]
+      },
+      {
+        "name": "Attack",
+        "seconds": 0.5000001,
+        "loop": false,
+        "beginError": 0,
+        "endError": 0,
+        "minY": 0,
+        "maximumMovement": 0.482631475,
+        "endHeight": 1,
+        "heldDelta": 0.02398597,
+        "curves": [
+          {
+            "name": "blendShape.Walk_Stretch",
+            "min": 0,
+            "max": 0
+          },
+          {
+            "name": "blendShape.Walk_Gather",
+            "min": 0,
+            "max": 0
+          },
+          {
+            "name": "blendShape.Attack_Anticipate",
+            "min": 0,
+            "max": 99.9999161
+          },
+          {
+            "name": "blendShape.Attack_Lunge",
+            "min": 0,
+            "max": 100
+          },
+          {
+            "name": "blendShape.Death_Soften",
+            "min": 0,
+            "max": 0
+          },
+          {
+            "name": "blendShape.Death_Puddle",
+            "min": 0,
+            "max": 0
+          }
+        ]
+      },
+      {
+        "name": "Death",
+        "seconds": 1.20000029,
+        "loop": false,
+        "beginError": 0,
+        "endError": 0.9638693,
+        "minY": 0,
+        "maximumMovement": 0.964017034,
+        "endHeight": 0.0379999876,
+        "heldDelta": 0,
+        "curves": [
+          {
+            "name": "blendShape.Walk_Stretch",
+            "min": 0,
+            "max": 0
+          },
+          {
+            "name": "blendShape.Walk_Gather",
+            "min": 0,
+            "max": 0
+          },
+          {
+            "name": "blendShape.Attack_Anticipate",
+            "min": 0,
+            "max": 0
+          },
+          {
+            "name": "blendShape.Attack_Lunge",
+            "min": 0,
+            "max": 0
+          },
+          {
+            "name": "blendShape.Death_Soften",
+            "min": 0,
+            "max": 99.9999847
+          },
+          {
+            "name": "blendShape.Death_Puddle",
+            "min": 0,
+            "max": 100
+          }
+        ]
+      }
+    ],
+    "deathToWalk": 0,
+    "deathToAttack": 0,
+    "shapes": 6,
+    "triangles": 428,
+    "boneCount": 0,
+    "materials": [
+      "MAT-VirginDrop-Grey",
+      "MAT-VirginDrop-Face"
+    ],
+    "scale": "(1.00, 1.00, 1.00)",
+    "rotation": "(0.00, 0.00, 0.00)",
+    "localBounds": "Center: (0.00, 0.50, 0.02), Extents: (0.74, 0.50, 0.68)",
+    "sceneDirtyBefore": false
+  },
+  "playables": [
+    {
+      "clip": "Walk",
+      "sampleTime": 0.233333334,
+      "weights": [
+        {
+          "name": "Walk_Stretch",
+          "weight": 100
+        },
+        {
+          "name": "Walk_Gather",
+          "weight": 0.00000117758429
+        },
+        {
+          "name": "Attack_Anticipate",
+          "weight": 0
+        },
+        {
+          "name": "Attack_Lunge",
+          "weight": 0
+        },
+        {
+          "name": "Death_Soften",
+          "weight": 0
+        },
+        {
+          "name": "Death_Puddle",
+          "weight": 0
+        }
+      ]
+    },
+    {
+      "clip": "Death",
+      "sampleTime": 1.20000029,
+      "weights": [
+        {
+          "name": "Walk_Stretch",
+          "weight": 0
+        },
+        {
+          "name": "Walk_Gather",
+          "weight": 0
+        },
+        {
+          "name": "Attack_Anticipate",
+          "weight": 0
+        },
+        {
+          "name": "Attack_Lunge",
+          "weight": 0
+        },
+        {
+          "name": "Death_Soften",
+          "weight": 0
+        },
+        {
+          "name": "Death_Puddle",
+          "weight": 100
+        }
+      ]
+    },
+    {
+      "clip": "Attack",
+      "sampleTime": 0.233333334,
+      "weights": [
+        {
+          "name": "Walk_Stretch",
+          "weight": 0
+        },
+        {
+          "name": "Walk_Gather",
+          "weight": 0
+        },
+        {
+          "name": "Attack_Anticipate",
+          "weight": 0
+        },
+        {
+          "name": "Attack_Lunge",
+          "weight": 100
+        },
+        {
+          "name": "Death_Soften",
+          "weight": 0
+        },
+        {
+          "name": "Death_Puddle",
+          "weight": 0
+        }
+      ]
+    }
+  ]
+}
