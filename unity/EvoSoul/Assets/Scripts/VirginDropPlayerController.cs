@@ -89,11 +89,11 @@ public sealed class VirginDropPlayerController : MonoBehaviour
 
         if (attacking && attackClip != null && visualRoot != null)
         {
-            attackClip.SampleAnimation(visualRoot.gameObject, attackTime);
+            SampleVisualClip(attackClip, attackTime);
             attackTime += Time.deltaTime;
             if (attackTime >= attackClip.length)
             {
-                attackClip.SampleAnimation(visualRoot.gameObject, 0f);
+                SampleVisualClip(attackClip, 0f);
                 attackTime = -1f;
             }
         }
@@ -103,7 +103,29 @@ public sealed class VirginDropPlayerController : MonoBehaviour
                 walkTime = Mathf.Repeat(walkTime + Time.deltaTime, walkClip.length);
             else
                 walkTime = 0f;
-            walkClip.SampleAnimation(visualRoot.gameObject, walkTime);
+            SampleVisualClip(walkClip, walkTime);
+        }
+    }
+
+    /// <summary>
+    /// The imported Virgin Drop clips contain transform curves. In the stage
+    /// scene the visual currently lives on this same root GameObject, so a raw
+    /// SampleAnimation call would restore the player to the clip's origin every
+    /// frame after CharacterController.Move had already moved it. Preserve the
+    /// controller-owned root transform while keeping the animated mesh pose.
+    /// </summary>
+    private void SampleVisualClip(AnimationClip clip, float time)
+    {
+        if (clip == null || visualRoot == null)
+            return;
+
+        bool visualIsMovementRoot = visualRoot == transform;
+        Vector3 worldPosition = transform.position;
+        Quaternion worldRotation = transform.rotation;
+        clip.SampleAnimation(visualRoot.gameObject, time);
+        if (visualIsMovementRoot)
+        {
+            transform.SetPositionAndRotation(worldPosition, worldRotation);
         }
     }
 
