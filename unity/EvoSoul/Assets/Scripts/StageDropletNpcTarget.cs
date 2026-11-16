@@ -31,8 +31,6 @@ public sealed class StageDropletNpcTarget : StageInteractionTarget
     private Vector3 fallbackWanderCenter;
     private float idleUntil;
     private float walkTime;
-    private float visualGroundOffset;
-    private bool hasVisualGroundOffset;
     private Coroutine defeatRoutine;
 
     public override StageInteractionAction InteractionAction => StageInteractionAction.Attack;
@@ -47,15 +45,18 @@ public sealed class StageDropletNpcTarget : StageInteractionTarget
     {
         visualRoot = targetVisualRoot;
         puddleVisual = targetPuddle;
+        // The imported death clip already ends in the intended puddle-like
+        // silhouette. A legacy primitive puddle was a black disk, so it must
+        // never replace the final animated frame.
+        if (puddleVisual != null)
+            puddleVisual.SetActive(false);
         walkClip = walk;
         deathClip = death;
-        CacheVisualGroundOffset();
     }
 
     public void ConfigureGroundCollider(Collider terrainCollider)
     {
         groundCollider = terrainCollider;
-        CacheVisualGroundOffset();
         SnapToGround();
     }
 
@@ -71,7 +72,6 @@ public sealed class StageDropletNpcTarget : StageInteractionTarget
             puddleVisual.SetActive(false);
         if (fadeRenderers == null || fadeRenderers.Length == 0)
             fadeRenderers = GetComponentsInChildren<Renderer>(true);
-        CacheVisualGroundOffset();
         SnapToGround();
         PickNextWanderPosition();
     }
@@ -80,6 +80,11 @@ public sealed class StageDropletNpcTarget : StageInteractionTarget
     {
         if (LifecycleState != DropletNpcLifecycleState.Wandering)
             return;
+
+        // Even while idling, retain contact with the terrain after the last
+        // evaluated walk pose; otherwise a blendshape bounds change can leave
+        // the droplet visually hovering until it picks its next destination.
+        SnapToGround();
 
         if (Time.time < idleUntil)
             return;
@@ -106,6 +111,11 @@ public sealed class StageDropletNpcTarget : StageInteractionTarget
             walkTime = 0f;
             SampleVisualClip(walkClip, 0f);
         }
+
+        // Walk blendshapes can change the evaluated renderer bounds. Snap a
+        // second time after sampling so the animated droplet never appears to
+        // float while wandering across uneven terrain.
+        SnapToGround();
 
         if ((transform.position - destination).sqrMagnitude <= 0.0025f)
         {
@@ -152,12 +162,11 @@ public sealed class StageDropletNpcTarget : StageInteractionTarget
         }
 
         LifecycleState = DropletNpcLifecycleState.Puddle;
+        // Keep the exact final death pose visible throughout the puddle hold.
+        // Do not activate the legacy primitive puddle: it renders as an
+        // unrelated black disk under URP lighting.
         if (puddleVisual != null)
-        {
-            if (visualRoot != null)
-                visualRoot.gameObject.SetActive(false);
-            puddleVisual.SetActive(true);
-        }
+            puddleVisual.SetActive(false);
         if (puddleSeconds > 0f)
             yield return new WaitForSeconds(puddleSeconds);
 
@@ -177,7 +186,7 @@ public sealed class StageDropletNpcTarget : StageInteractionTarget
         for (int rendererIndex = 0; rendererIndex < fadeRenderers.Length; rendererIndex++)
         {
             Renderer renderer = fadeRenderers[rendererIndex];
-            if (renderer == null)
+            if (renderer == null || !renderer.gameObject.activeInHierarchy)
                 continue;
             materials[rendererIndex] = renderer.materials;
             baseColors[rendererIndex] = new Color[materials[rendererIndex].Length];
@@ -216,30 +225,24 @@ public sealed class StageDropletNpcTarget : StageInteractionTarget
         nextWanderPosition = new Vector3(center.x + offset.x, transform.position.y, center.z + offset.y);
     }
 
-    private void CacheVisualGroundOffset()
-    {
-        if (visualRoot == null)
-            return;
-
-        Renderer renderer = visualRoot.GetComponentInChildren<Renderer>(true);
-        if (renderer == null)
-            return;
-
-        visualGroundOffset = renderer.bounds.min.y - transform.position.y;
-        hasVisualGroundOffset = true;
-    }
-
     private void SnapToGround()
     {
-        if (groundCollider == null || !hasVisualGroundOffset)
+        if (groundCollider == null || visualRoot == null)
             return;
 
         Ray ray = new Ray(new Vector3(transform.position.x, 100f, transform.position.z), Vector3.down);
         if (!groundCollider.Raycast(ray, out RaycastHit hit, 200f))
             return;
 
+        Renderer renderer = visualRoot.GetComponentInChildren<Renderer>(true);
+        if (renderer == null)
+            return;
+
+        // Do not use the cached offset here: an evaluated walk/death pose may
+        // have a different bounds minimum from the idle pose.
+        float evaluatedVisualOffset = renderer.bounds.min.y - transform.position.y;
         Vector3 position = transform.position;
-        position.y = hit.point.y - visualGroundOffset;
+        position.y = hit.point.y - evaluatedVisualOffset;
         transform.position = position;
     }
 

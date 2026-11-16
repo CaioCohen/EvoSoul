@@ -4,11 +4,14 @@ using UnityEngine;
 public sealed class StageSelectionVisualController : MonoBehaviour
 {
     [SerializeField] private StageInteractionSelector selector;
+    [SerializeField] private StageTargetArrowIndicator arrowIndicator;
 
     private void Awake()
     {
         if (selector == null)
             selector = GetComponent<StageInteractionSelector>();
+        if (arrowIndicator == null)
+            arrowIndicator = GetComponent<StageTargetArrowIndicator>();
     }
 
     private void OnEnable()
