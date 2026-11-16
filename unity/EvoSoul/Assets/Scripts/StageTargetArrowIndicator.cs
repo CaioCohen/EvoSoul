@@ -1,8 +1,10 @@
 using UnityEngine;
 
 /// <summary>
-/// One lightweight world-space arrow that follows the selector's current
-/// target. It deliberately leaves target materials untouched.
+/// One lightweight world-space arrow that is parented to the selector's
+/// current target. Parenting keeps the indicator with a fruit or droplet when
+/// that target is repositioned in the scene; the late update only maintains
+/// its height above animated renderer bounds.
 /// </summary>
 public sealed class StageTargetArrowIndicator : MonoBehaviour
 {
@@ -76,6 +78,10 @@ public sealed class StageTargetArrowIndicator : MonoBehaviour
 
         currentRenderers = currentTarget.GetComponentsInChildren<Renderer>(true);
         initialY = Time.time;
+        // Keep the indicator in the target's hierarchy while it is visible.
+        // World coordinates are retained here because LateUpdate computes the
+        // exact vertical anchor from the target's current renderer bounds.
+        arrowRoot.transform.SetParent(currentTarget.transform, true);
         arrowRoot.SetActive(true);
     }
 
@@ -84,7 +90,13 @@ public sealed class StageTargetArrowIndicator : MonoBehaviour
         currentTarget = null;
         currentRenderers = null;
         if (arrowRoot != null)
+        {
             arrowRoot.SetActive(false);
+            // A consumed/removed target can later be disabled. Return the
+            // pooled indicator to its stable host rather than leaving it in a
+            // disabled target subtree between selections.
+            arrowRoot.transform.SetParent(transform, true);
+        }
     }
 
     private void CreateArrow()

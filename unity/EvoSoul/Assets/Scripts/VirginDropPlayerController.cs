@@ -47,6 +47,11 @@ public sealed class VirginDropPlayerController : MonoBehaviour
         controller.height = 1.7f;
         controller.radius = 0.35f;
         controller.center = new Vector3(0f, 0.85f, 0f);
+        // The visible stage ground has its own MeshCollider.  The default
+        // CharacterController skin (0.08m) left this small creature visibly
+        // floating above that surface; a mobile-safe 2cm skin keeps collision
+        // stable while letting its base read as touching the terrain.
+        controller.skinWidth = 0.02f;
 
         if (characterAnimator == null)
             characterAnimator = GetComponentInChildren<Animator>();
