@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc3e2e7eea38e924ba8141913a04fb65, type: 3}
+  m_Name: NurseryEvolutionCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::StageEvolutionCatalog
+  forms:
+  - lineage: 2
+    prefab: {fileID: 919132149155446097, guid: b80c5c7130aec0b48a47b84ba6746ed4, type: 3}
+    walk: {fileID: 2672394919586473091, guid: b80c5c7130aec0b48a47b84ba6746ed4, type: 3}
+    attack: {fileID: 6706620489836825330, guid: b80c5c7130aec0b48a47b84ba6746ed4, type: 3}
+  - lineage: 1
+    prefab: {fileID: 919132149155446097, guid: b37d01d577c2a4f49bddaf94e94968fe, type: 3}
+    walk: {fileID: -1471353177220961689, guid: b37d01d577c2a4f49bddaf94e94968fe, type: 3}
+    attack: {fileID: -4612763588421036466, guid: b37d01d577c2a4f49bddaf94e94968fe, type: 3}
+  - lineage: 3
+    prefab: {fileID: 919132149155446097, guid: 25fc4f2af1429d449a47d8be1218f921, type: 3}
+    walk: {fileID: -2100529441703391463, guid: 25fc4f2af1429d449a47d8be1218f921, type: 3}
+    attack: {fileID: -6867806984790330079, guid: 25fc4f2af1429d449a47d8be1218f921, type: 3}

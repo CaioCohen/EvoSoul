@@ -12,6 +12,7 @@ public sealed class StageEnergyLedger : MonoBehaviour
     private readonly HashSet<string> awardedSourceIds = new();
 
     [SerializeField, Range(1, 6)] private int stageNumber = 1;
+    [SerializeField] private StageEvolutionLineage startingLineage = StageEvolutionLineage.Undecided;
     private int positiveEnergy;
     private int negativeEnergy;
     [SerializeField] private StageProgressState progressState = StageProgressState.Collecting;
@@ -26,7 +27,7 @@ public sealed class StageEnergyLedger : MonoBehaviour
     public StageProgressState ProgressState => progressState;
     public StageEvolutionLineage CurrentLineage => progressState == StageProgressState.Evolved
         ? confirmedLineage
-        : StageEnergyRules.DetermineLineage(positiveEnergy, negativeEnergy);
+        : StageEnergyRules.ResolveTransition(startingLineage, positiveEnergy, negativeEnergy);
     public StageProgressSnapshot ProgressSnapshot => new(Snapshot, progressState, CurrentLineage);
     public bool CanEvolve => progressState == StageProgressState.ReadyToEvolve;
 
@@ -75,7 +76,7 @@ public sealed class StageEnergyLedger : MonoBehaviour
         if (!CanEvolve)
             return false;
 
-        confirmedLineage = StageEnergyRules.DetermineLineage(positiveEnergy, negativeEnergy);
+        confirmedLineage = StageEnergyRules.ResolveTransition(startingLineage, positiveEnergy, negativeEnergy);
         progressState = StageProgressState.Evolved;
         ProgressChanged?.Invoke(ProgressSnapshot);
         EvolutionConfirmed?.Invoke(confirmedLineage);
@@ -86,6 +87,15 @@ public sealed class StageEnergyLedger : MonoBehaviour
     {
         return EnergyMilestones[Mathf.Clamp(stage, 1, EnergyMilestones.Length) - 1];
     }
+
+    // Configure before collecting any energy; each scene starts a fresh ledger.
+    public void ConfigureStage(int stage, StageEvolutionLineage lineage)
+    {
+        if (TotalEnergy != 0 || progressState != StageProgressState.Collecting)
+            throw new InvalidOperationException("Cannot reconfigure a stage in progress.");
+        stageNumber = Mathf.Clamp(stage, 1, 6);
+        startingLineage = lineage;
+    }
 }
 
 /// <summary>
@@ -94,6 +104,15 @@ public sealed class StageEnergyLedger : MonoBehaviour
 /// </summary>
 public static class StageEnergyRules
 {
+    public static StageEvolutionLineage ResolveTransition(StageEvolutionLineage current, int positive, int negative)
+    {
+        var tendency = DetermineLineage(positive, negative);
+        if (current == StageEvolutionLineage.Demonic)
+            return tendency == StageEvolutionLineage.Celestial ? StageEvolutionLineage.Draconic : current;
+        if (current == StageEvolutionLineage.Celestial)
+            return tendency == StageEvolutionLineage.Demonic ? StageEvolutionLineage.Draconic : current;
+        return tendency;
+    }
     public static void ApplyAward(ref int positive, ref int negative, StageEnergyKind kind, int limit)
     {
         limit = Mathf.Max(1, limit);

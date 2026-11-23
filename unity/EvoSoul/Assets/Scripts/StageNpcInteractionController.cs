@@ -47,7 +47,22 @@ public sealed class StageNpcInteractionController : MonoBehaviour
 
         selector.RefreshSelection();
         StageInteractionSelection selection = selector.CurrentSelection;
-        if (selection.Action != StageInteractionAction.Attack || selection.Target is not StageDropletNpcTarget npc)
+        if (selection.Action != StageInteractionAction.Attack)
+            return false;
+
+        if (selection.Target is StagePurifiablePlant plant)
+        {
+            bool restored = plant.TryPurify(energyLedger);
+            if (restored)
+            {
+                player.RequestAttack();
+                StageInteractionAudio.PlayAttack();
+                selector.RefreshSelection();
+            }
+            return restored;
+        }
+
+        if (selection.Target is not StageDropletNpcTarget npc)
             return false;
 
         if (!npc.IsAvailable || !npc.TryReserveInteraction())

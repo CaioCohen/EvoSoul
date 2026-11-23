@@ -74,7 +74,8 @@ public sealed class StageInteractionPromptView : MonoBehaviour
         if (promptRoot != null)
             promptRoot.SetActive(visible);
         if (label != null)
-            label.text = currentAction == StageInteractionAction.Eat ? "Comer" : "Atacar";
+            label.text = currentAction == StageInteractionAction.Eat ? "Comer" :
+                selection.Target is StagePurifiablePlant ? "Golpear" : "Atacar";
     }
 
     private void DispatchCurrentAction()

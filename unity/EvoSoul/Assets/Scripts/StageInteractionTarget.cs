@@ -60,4 +60,14 @@ public abstract class StageInteractionTarget : MonoBehaviour, IStageInteractionT
             interactionReserved = false;
         AvailabilityChanged?.Invoke(this);
     }
+
+    // A restored target is a new interaction with a new ledger identity.
+    protected void ResetForNewInteraction()
+    {
+        rewardSourceId = Guid.NewGuid().ToString("N");
+        rewardClaimed = false;
+        interactionReserved = false;
+        isAvailable = true;
+        AvailabilityChanged?.Invoke(this);
+    }
 }

@@ -129,6 +129,11 @@ public sealed class StageEvolutionPromptView : MonoBehaviour
         // Intentionally no action yet: evolution mechanics are outside this
         // milestone affordance. Drawing it as a button makes the future action
         // discoverable while preserving the requested no-op behavior today.
-        GUI.Button(area, "Evoluir", style);
+        if (GUI.Button(area, "Evoluir", style))
+        {
+            // Remains a no-op in scenes that have not opted into the evolution flow.
+            StageEvolutionSequence sequence = FindAnyObjectByType<StageEvolutionSequence>();
+            if (sequence != null) sequence.RequestEvolution();
+        }
     }
 }
