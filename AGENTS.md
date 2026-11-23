@@ -3,6 +3,8 @@
 
 For Blender animation creation, editing, action switching, or playback diagnosis, use .agents/skills/blender-animation-binding/SKILL.md. Follow it to bind Actions and Action Slots to the correct animated datablock, inspect NLA conflicts, and validate evaluated motion before saving.
 
+Also use .agents/skills/blender-animation-switching/SKILL.md for Blender animation creation and editing, including independent Action switching and validation.
+
 For all 3D asset creation tasks:
 
 1. Use the `text-to-blender` skill to plan and execute Blender modeling.
