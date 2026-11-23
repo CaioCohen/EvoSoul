@@ -3,7 +3,7 @@ using UnityEngine;
 /// <summary>
 /// Gives an available stage fruit a small, deterministic idle motion without
 /// moving any of its local children independently (leaf, visual or collider).
-/// Attach this to the fruit target root so the complete interactive object
+/// Attach this to the Fruit_XX root so the complete interactive object
 /// keeps its relative layout while bobbing and rotating.
 /// </summary>
 public sealed class StageFruitIdleMotion : MonoBehaviour

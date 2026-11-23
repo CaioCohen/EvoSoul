@@ -4,10 +4,14 @@ using UnityEngine;
 
 public sealed class StageEnergyLedger : MonoBehaviour
 {
+    // Kept for existing Stage 1 tooling. Runtime scoring always uses
+    // EnergyMilestone, which is selected by stageNumber.
     public const int StageEnergyLimit = 10;
+    private static readonly int[] EnergyMilestones = { 10, 50, 200, 1000, 5000, 10000 };
 
     private readonly HashSet<string> awardedSourceIds = new();
 
+    [SerializeField, Range(1, 6)] private int stageNumber = 1;
     private int positiveEnergy;
     private int negativeEnergy;
     [SerializeField] private StageProgressState progressState = StageProgressState.Collecting;
@@ -16,6 +20,8 @@ public sealed class StageEnergyLedger : MonoBehaviour
     public int PositiveEnergy => positiveEnergy;
     public int NegativeEnergy => negativeEnergy;
     public int TotalEnergy => positiveEnergy + negativeEnergy;
+    public int StageNumber => stageNumber;
+    public int EnergyMilestone => GetMilestoneForStage(stageNumber);
     public StageEnergySnapshot Snapshot => new(positiveEnergy, negativeEnergy);
     public StageProgressState ProgressState => progressState;
     public StageEvolutionLineage CurrentLineage => progressState == StageProgressState.Evolved
@@ -33,8 +39,26 @@ public sealed class StageEnergyLedger : MonoBehaviour
         if (progressState == StageProgressState.Evolved || string.IsNullOrWhiteSpace(sourceId) || !awardedSourceIds.Add(sourceId))
             return false;
 
-        StageEnergyRules.ApplyAward(ref positiveEnergy, ref negativeEnergy, kind, StageEnergyLimit);
-        if (positiveEnergy + negativeEnergy >= StageEnergyLimit)
+        StageEnergyRules.ApplyAward(ref positiveEnergy, ref negativeEnergy, kind, EnergyMilestone);
+        if (positiveEnergy + negativeEnergy >= EnergyMilestone)
+            progressState = StageProgressState.ReadyToEvolve;
+
+        EnergyChanged?.Invoke(Snapshot);
+        ProgressChanged?.Invoke(ProgressSnapshot);
+        return true;
+    }
+
+    /// <summary>
+    /// Grants one energy unit for development tooling. It deliberately follows
+    /// the same cap and post-milestone replacement rules as world interactions.
+    /// </summary>
+    public bool TryAwardDebug(StageEnergyKind kind)
+    {
+        if (progressState == StageProgressState.Evolved)
+            return false;
+
+        StageEnergyRules.ApplyAward(ref positiveEnergy, ref negativeEnergy, kind, EnergyMilestone);
+        if (positiveEnergy + negativeEnergy >= EnergyMilestone)
             progressState = StageProgressState.ReadyToEvolve;
 
         EnergyChanged?.Invoke(Snapshot);
@@ -56,6 +80,11 @@ public sealed class StageEnergyLedger : MonoBehaviour
         ProgressChanged?.Invoke(ProgressSnapshot);
         EvolutionConfirmed?.Invoke(confirmedLineage);
         return true;
+    }
+
+    public static int GetMilestoneForStage(int stage)
+    {
+        return EnergyMilestones[Mathf.Clamp(stage, 1, EnergyMilestones.Length) - 1];
     }
 }
 
@@ -91,9 +120,10 @@ public static class StageEnergyRules
 
     public static StageEvolutionLineage DetermineLineage(int positive, int negative)
     {
-        if (positive >= 8)
+        int total = positive + negative;
+        if (total > 0 && positive * 100 >= total * 71)
             return StageEvolutionLineage.Celestial;
-        if (negative >= 8)
+        if (total > 0 && negative * 100 >= total * 71)
             return StageEvolutionLineage.Demonic;
         return StageEvolutionLineage.Draconic;
     }

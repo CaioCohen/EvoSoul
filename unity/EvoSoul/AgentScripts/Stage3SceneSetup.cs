@@ -146,12 +146,14 @@ public static class Stage3SceneSetup
                 eventSystem.gameObject.AddComponent<InputSystemUIInputModule>();
         }
 
-        GameObject debugRoot = CreatePanel(canvasRoot.transform, "DebugPanel", new Vector2(330f, 210f), new Vector2(20f, -20f), new Vector2(0f, 1f));
+        GameObject debugRoot = CreatePanel(canvasRoot.transform, "DebugPanel", new Vector2(330f, 270f), new Vector2(20f, -20f), new Vector2(0f, 1f));
         TMP_Text positive = CreateLabel(debugRoot.transform, "PositiveLabel", new Vector2(10f, -15f));
         TMP_Text negative = CreateLabel(debugRoot.transform, "NegativeLabel", new Vector2(10f, -50f));
         TMP_Text total = CreateLabel(debugRoot.transform, "TotalLabel", new Vector2(10f, -85f));
         TMP_Text lineage = CreateLabel(debugRoot.transform, "LineageLabel", new Vector2(10f, -120f));
-        Button evolveButton = CreateButton(debugRoot.transform, "EvolveButton", "Evoluir", new Vector2(110f, -170f), new Vector2(160f, 42f));
+        Button positiveEnergyButton = CreateButton(debugRoot.transform, "AddPositiveEnergyButton", "+ Energia Positiva", new Vector2(10f, -155f), new Vector2(150f, 42f));
+        Button negativeEnergyButton = CreateButton(debugRoot.transform, "AddNegativeEnergyButton", "+ Energia Negativa", new Vector2(170f, -155f), new Vector2(150f, 42f));
+        Button evolveButton = CreateButton(debugRoot.transform, "EvolveButton", "Evoluir", new Vector2(85f, -212f), new Vector2(160f, 42f));
 
         StageDebugProgressView debugView = canvasRoot.AddComponent<StageDebugProgressView>();
         debugView.enabled = false;
@@ -164,6 +166,8 @@ public static class Stage3SceneSetup
         debugData.FindProperty("evolvePrompt").objectReferenceValue = evolveButton.gameObject;
         debugData.FindProperty("debugContentRoot").objectReferenceValue = debugRoot;
         debugData.ApplyModifiedPropertiesWithoutUndo();
+        positiveEnergyButton.onClick.AddListener(debugView.AddPositiveEnergy);
+        negativeEnergyButton.onClick.AddListener(debugView.AddNegativeEnergy);
         evolveButton.onClick.AddListener(debugView.ConfirmEvolution);
         debugView.enabled = true;
 

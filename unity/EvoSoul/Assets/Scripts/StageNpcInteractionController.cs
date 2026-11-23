@@ -76,6 +76,7 @@ public sealed class StageNpcInteractionController : MonoBehaviour
             return false;
         }
 
+        StageInteractionAudio.PlayAttack();
         selector.RefreshSelection();
         return true;
     }

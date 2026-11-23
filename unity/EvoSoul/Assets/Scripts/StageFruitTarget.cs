@@ -23,6 +23,19 @@ public sealed class StageFruitTarget : StageInteractionTarget
     }
 
     /// <summary>
+    /// Supplies the renderers that define the fruit's visible bounds. The
+    /// interaction collider can deliberately live lower than the mesh, so an
+    /// indicator must anchor to this presentation instead of the collider's
+    /// transform.
+    /// </summary>
+    public Renderer[] GetIndicatorRenderers()
+    {
+        return fruitVisual != null
+            ? fruitVisual.GetComponentsInChildren<Renderer>(true)
+            : GetComponentsInChildren<Renderer>(true);
+    }
+
+    /// <summary>
     /// Finishes the presentation after the target reward has been claimed.
     /// This is intentionally separate from reward claiming so feedback can be
     /// replaced later without duplicating scoring rules.

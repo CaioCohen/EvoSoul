@@ -68,6 +68,7 @@ public sealed class StageFruitInteractionController : MonoBehaviour
         }
 
         fruit.CompleteConsumption();
+        StageInteractionAudio.PlayEat();
         selector.RefreshSelection();
         return true;
     }

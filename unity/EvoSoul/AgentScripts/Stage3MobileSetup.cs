@@ -18,6 +18,9 @@ public static class Stage3MobileSetup
         if (player == null || selector == null || canvas == null)
             throw new System.InvalidOperationException("Expected player, selector, and canvas were not found.");
 
+        if (canvas.GetComponent<StageEvolutionPromptView>() == null)
+            canvas.gameObject.AddComponent<StageEvolutionPromptView>();
+
         var selectorProperties = new SerializedObject(selector);
         selectorProperties.FindProperty("interactionDistance").floatValue = 2.4f;
         selectorProperties.FindProperty("minimumForwardDot").floatValue = 0.65f;

@@ -76,7 +76,12 @@ public sealed class StageTargetArrowIndicator : MonoBehaviour
             return;
         }
 
-        currentRenderers = currentTarget.GetComponentsInChildren<Renderer>(true);
+        // Fruit colliders are intentionally separate from their visual branch.
+        // Read their actual mesh bounds so a repositioned fruit cannot leave
+        // the selection arrow behind at the collider's old height.
+        currentRenderers = currentTarget is StageFruitTarget fruit
+            ? fruit.GetIndicatorRenderers()
+            : currentTarget.GetComponentsInChildren<Renderer>(true);
         initialY = Time.time;
         // Keep the indicator in the target's hierarchy while it is visible.
         // World coordinates are retained here because LateUpdate computes the
