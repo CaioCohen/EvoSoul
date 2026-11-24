@@ -14,5 +14,8 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/ProfaneGardenStage02.unity
     guid: de23fb11835566042ae7d656c29b7ee4
+  - enabled: 1
+    path: Assets/Scenes/DraconicValeStage02.unity
+    guid: c55e87679f48dab4bb4f3dc1e673f75a
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

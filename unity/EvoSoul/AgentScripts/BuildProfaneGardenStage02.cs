@@ -30,6 +30,153 @@ public static class BuildProfaneGardenStage02
             .OfType<AnimationClip>().First(c => !c.name.StartsWith("__preview__") && c.name.EndsWith(name));
     }
 
+    // Kept separate from Main so an already-authored Stage 02 scene can be
+    // safely rebalanced without rebuilding or touching Stage 01.
+    public static string PolishCurrentStage02()
+    {
+        var scene = SceneManager.GetActiveScene();
+        if (scene.path != ScenePath)
+            throw new Exception("Open ProfaneGardenStage02 before polishing it.");
+
+        var world = GameObject.Find("ProfaneGardenWorld");
+        if (world == null) throw new Exception("ProfaneGardenWorld is missing.");
+
+        // The previous runtime combiner generated zero-bounds meshes for the
+        // multi-material FBX props after a scene transition. Keeping the
+        // lightweight source renderers is more reliable than culling the
+        // garden; the kit remains comfortably small for this single stage.
+        var visualBatcher = world.GetComponent<ProfaneGardenVisualBatcher>();
+        if (visualBatcher != null) visualBatcher.enabled = false;
+        RestoreSourceRenderers(world.transform.Find("GardenDecoration"));
+        RestoreSourceRenderers(world.transform.Find("PurifiablePlants"));
+
+        // Spread ambient scenery across the full island instead of pulling it
+        // into a central ring. A fixed seed keeps the authored layout stable
+        // between direct loads and portal transitions. The spawn/interaction
+        // pocket remains open so the player never appears inside decoration.
+        var decor = world.transform.Find("GardenDecoration");
+        if (decor != null)
+        {
+            var random = new System.Random(73129);
+            var playerSpawn = new Vector2(0f, -2.5f);
+            foreach (Transform item in decor)
+            {
+                if (item.name == "LavaSea") continue;
+                bool isTree = item.name.Contains("tree");
+                Vector2 candidate = Vector2.zero;
+                // Trees form a sparse outer silhouette; smaller props fill
+                // the middle and outer rings without crowding the centre.
+                for (int attempt = 0; attempt < 32; attempt++)
+                {
+                    float angle = (float)(random.NextDouble() * Mathf.PI * 2d);
+                    float minRadius = isTree ? 19f : 10f;
+                    float maxRadius = isTree ? 29f : 28f;
+                    float radius = Mathf.Lerp(minRadius, maxRadius, Mathf.Sqrt((float)random.NextDouble()));
+                    candidate = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius;
+                    if ((candidate - playerSpawn).sqrMagnitude >= 64f) break;
+                }
+                item.position = new Vector3(candidate.x, item.position.y, candidate.y);
+                // Deliberately preserve the authored transform orientation.  Imported
+                // FBX props have a conversion rotation (notably trees), so assigning a
+                // fresh world rotation here would discard it and lay the mesh down.
+            }
+        }
+
+        // Keep all ten NPCs available, but place their initial wandering
+        // radius close enough that a player arriving from the portal reads a
+        // living garden immediately.
+        var spawner = UnityEngine.Object.FindAnyObjectByType<ProfaneNpcSpawner>();
+        if (spawner != null)
+        {
+            var so = new SerializedObject(spawner);
+            so.FindProperty("radius").floatValue = 14f;
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        CreateOrRefreshLavaSea(world.transform, decor);
+        ConfigureTreeTrunkColliders(decor);
+        EditorSceneManager.MarkSceneDirty(scene);
+        if (!EditorSceneManager.SaveScene(scene, ScenePath)) throw new Exception("Could not save Stage 02.");
+        return "Polished Stage 02: deterministically distributed ambient decoration, preserved clear spawn pocket and NPC arrival radius; lava sea created.";
+    }
+
+    static void CreateOrRefreshLavaSea(Transform world, Transform decor)
+    {
+        var old = world.Find("LavaSea");
+        if (old != null) UnityEngine.Object.DestroyImmediate(old.gameObject);
+        var sea = GameObject.CreatePrimitive(PrimitiveType.Plane);
+        sea.name = "LavaSea";
+        sea.transform.SetParent(world, false);
+        sea.transform.position = new Vector3(0f, -4.15f, 0f);
+        // Match Stage 01's ocean coverage.  A primitive plane is 10 metres
+        // across, so this one low-poly quad covers 2 km square: the gameplay
+        // camera can never reach its visual edge around the 73m island.
+        sea.transform.localScale = new Vector3(200f, 1f, 200f);
+        var collider = sea.GetComponent<Collider>();
+        if (collider != null) UnityEngine.Object.DestroyImmediate(collider);
+        var path = Directory + "PG_Lava.mat";
+        var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
+        var oceanShader = AssetDatabase.LoadAssetAtPath<Shader>(
+            "Assets/Art/Environment/Ocean/BercarioOceanWater.shadergraph");
+        var lavaTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(Directory + "PG_LavaPattern.png");
+        if (mat == null || oceanShader == null || lavaTexture == null)
+            throw new Exception("Missing Profane lava material, texture, or Stage 01 ocean shader.");
+
+        // The lava intentionally uses the exact repeated, scrolling Shader
+        // Graph arrangement as Stage 01 water; only the texture/palette and
+        // flow direction differ. This prevents a flat colour plane and keeps
+        // the visual cost to a single textured quad.
+        mat.shader = oceanShader;
+        mat.SetTexture("_BaseMap", lavaTexture);
+        mat.SetTextureScale("_BaseMap", new Vector2(72f, 72f));
+        mat.SetColor("_BaseColor", Color.white);
+        EditorUtility.SetDirty(mat);
+
+        var movement = sea.AddComponent<OceanSurfaceMotion>();
+        var motion = new SerializedObject(movement);
+        motion.FindProperty("scrollSpeed").vector2Value = new Vector2(-.018f, .011f);
+        motion.FindProperty("textureScale").vector2Value = new Vector2(72f, 72f);
+        motion.ApplyModifiedPropertiesWithoutUndo();
+        sea.GetComponent<MeshRenderer>().sharedMaterial = mat;
+    }
+
+    static void RestoreSourceRenderers(Transform root)
+    {
+        if (root == null) return;
+        var combined = root.GetComponentsInChildren<Transform>(true)
+            .Where(t => t.name == "CombinedVisual").ToArray();
+        foreach (var item in combined) UnityEngine.Object.DestroyImmediate(item.gameObject);
+        foreach (var renderer in root.GetComponentsInChildren<MeshRenderer>(true))
+            renderer.enabled = true;
+    }
+
+    // Trees are solid at their trunks only, matching the Stage 01 convention.
+    // Canopies and branches deliberately remain non-blocking so their broad
+    // low-poly silhouettes do not create invisible walls for the player.
+    static void ConfigureTreeTrunkColliders(Transform decor)
+    {
+        if (decor == null) return;
+        foreach (var tree in decor.Cast<Transform>().Where(item => item.name.StartsWith("pg_tree")))
+        {
+            foreach (var renderer in tree.GetComponentsInChildren<Renderer>(true)
+                .Where(item => item.name.IndexOf("TreeTrunk", StringComparison.OrdinalIgnoreCase) >= 0))
+            {
+                var collider = renderer.GetComponent<CapsuleCollider>();
+                if (collider == null) collider = renderer.gameObject.AddComponent<CapsuleCollider>();
+                var bounds = renderer.bounds;
+                var scale = renderer.transform.lossyScale;
+                float safeX = Mathf.Max(.0001f, Mathf.Abs(scale.x));
+                float safeY = Mathf.Max(.0001f, Mathf.Abs(scale.y));
+                float safeZ = Mathf.Max(.0001f, Mathf.Abs(scale.z));
+                collider.center = renderer.transform.InverseTransformPoint(bounds.center);
+                collider.direction = 1;
+                collider.height = Mathf.Max(.2f, bounds.size.y / safeY);
+                collider.radius = Mathf.Max(.05f, Mathf.Min(bounds.size.x / safeX, bounds.size.z / safeZ) * .32f);
+                collider.isTrigger = false;
+            }
+        }
+    }
+
     public static string Main()
     {
         var original = SceneManager.GetActiveScene();
@@ -84,6 +231,7 @@ public static class BuildProfaneGardenStage02
             var tree = Place(Asset("pg_tree"), scenery, "pg_tree_inner_" + i, point, i * 37f);
             tree.transform.localScale *= 2f;
         }
+        ConfigureTreeTrunkColliders(scenery);
         var lights = new GameObject("GardenLight"); lights.transform.SetParent(world.transform, false);
         var light = lights.AddComponent<Light>(); light.type = LightType.Directional;
         light.intensity = 1.1f; light.color = new Color(1f,.82f,.88f); light.shadows = LightShadows.Soft;

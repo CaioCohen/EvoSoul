@@ -7,6 +7,7 @@ public sealed class StageEvolutionPortal : MonoBehaviour
     [SerializeField] private Transform player;
     [SerializeField] private GameObject visual;
     [SerializeField] private string demonicScene = "ProfaneGardenStage02";
+    [SerializeField] private string draconicScene = "DraconicValeStage02";
     [SerializeField] private float radius = 1.5f;
     private StageEvolutionLineage lineage;
     private bool visible;
@@ -14,12 +15,18 @@ public sealed class StageEvolutionPortal : MonoBehaviour
     public void Show(StageEvolutionLineage result) { lineage = result; visible = true; if (visual != null) visual.SetActive(true); }
     public bool IsPlayerInRange => visible && player != null &&
         Vector3.Distance(player.position, transform.position) <= radius;
-    public bool DestinationAvailable => lineage == StageEvolutionLineage.Demonic &&
-        Application.CanStreamedLevelBeLoaded(demonicScene);
+    private string DestinationScene => lineage switch
+    {
+        StageEvolutionLineage.Demonic => demonicScene,
+        StageEvolutionLineage.Draconic => draconicScene,
+        _ => string.Empty
+    };
+    public bool DestinationAvailable => !string.IsNullOrEmpty(DestinationScene) &&
+        Application.CanStreamedLevelBeLoaded(DestinationScene);
     public bool TryAdvance()
     {
         if (!IsPlayerInRange || !DestinationAvailable) return false;
-        SceneManager.LoadScene(demonicScene);
+        SceneManager.LoadScene(DestinationScene);
         return true;
     }
     private void OnGUI()

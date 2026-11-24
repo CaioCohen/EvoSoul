@@ -6,15 +6,18 @@ public sealed class StagePurifiablePlant : StageInteractionTarget
 {
     [SerializeField] private GameObject corruptedVisual;
     [SerializeField] private GameObject purifiedVisual;
+    [SerializeField] private string interactionLabel = "Golpear";
     [SerializeField] private bool allowRecorruption = true;
     [SerializeField, Min(0f)] private float meanRecorruptionSeconds = 600f;
     [SerializeField, Min(0f)] private float recorruptionStandardDeviation = 30f;
     public override StageInteractionAction InteractionAction => StageInteractionAction.Attack;
+    public string InteractionLabel => string.IsNullOrWhiteSpace(interactionLabel) ? "Golpear" : interactionLabel;
 
-    public void Configure(GameObject corrupted, GameObject purified)
+    public void Configure(GameObject corrupted, GameObject purified, string prompt = "Golpear")
     {
         corruptedVisual = corrupted;
         purifiedVisual = purified;
+        interactionLabel = prompt;
         if (corruptedVisual != null) corruptedVisual.SetActive(true);
         if (purifiedVisual != null) purifiedVisual.SetActive(false);
     }

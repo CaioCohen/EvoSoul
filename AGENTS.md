@@ -12,6 +12,9 @@ For all 3D asset creation tasks:
 3. Use the `blender-export` skill for exporting assets to Unity.
 4. Use the `unity-cli` skill for Unity integration and validation.
 
+For any stage surface intended to read as ocean, lava, fog, void, or another
+unbounded backdrop, use `.agents/skills/infinite-environment-surface/SKILL.md`.
+
 ### Rules
 
 - Prefer the live Blender MCP for modeling operations.
@@ -25,4 +28,7 @@ For all 3D asset creation tasks:
 - Never claim an MCP interaction succeeded unless the tool actually ran.
 - Never silently substitute a standalone Blender script for a requested MCP operation.
 - Report modeling, export and import failures.
+- Every tree placed in a playable stage needs a simple non-trigger trunk collider.
+  Match the established Stage 01 collision behavior: it must block the player at
+  the trunk without turning branches/canopy into a large invisible obstacle.
 
