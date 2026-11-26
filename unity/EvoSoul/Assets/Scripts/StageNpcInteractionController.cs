@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 #endif
@@ -15,6 +16,8 @@ public sealed class StageNpcInteractionController : MonoBehaviour
     [SerializeField, Min(0f)] private float attackImpactDelay = 0.18f;
 
     private bool attackQueued;
+    private Coroutine plantSuction;
+    private StagePurifiablePlant reservedPlant;
 
     private void Awake()
     {
@@ -52,14 +55,10 @@ public sealed class StageNpcInteractionController : MonoBehaviour
 
         if (selection.Target is StagePurifiablePlant plant)
         {
-            bool restored = plant.TryPurify(energyLedger);
-            if (restored)
-            {
-                player.RequestAttack();
-                StageInteractionAudio.PlayAttack();
-                selector.RefreshSelection();
-            }
-            return restored;
+            if (plantSuction != null || !plant.TryReserveInteraction()) return false;
+            reservedPlant = plant;
+            plantSuction = StartCoroutine(SuckPlant(plant));
+            return true;
         }
 
         if (selection.Target is not StageDropletNpcTarget npc)
@@ -94,6 +93,31 @@ public sealed class StageNpcInteractionController : MonoBehaviour
         StageInteractionAudio.PlayAttack();
         selector.RefreshSelection();
         return true;
+    }
+
+    private IEnumerator SuckPlant(StagePurifiablePlant plant)
+    {
+        Color color = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Contains("Draconic")
+            ? new Color(1f, .35f, .035f) : new Color(1f, .04f, .12f);
+        var fx = new GameObject("PlantSuctionVFX").AddComponent<StageSuctionVfx>();
+        fx.Configure(plant.transform, player.transform, color, .9f);
+        yield return new WaitForSeconds(.9f);
+        if (plant != null)
+        {
+            plant.ReleaseInteractionReservation();
+            plant.TryPurify(energyLedger);
+        }
+        reservedPlant = null;
+        plantSuction = null;
+        if (selector != null) selector.RefreshSelection();
+    }
+
+    private void OnDisable()
+    {
+        if (plantSuction != null) StopCoroutine(plantSuction);
+        if (reservedPlant != null) reservedPlant.ReleaseInteractionReservation();
+        plantSuction = null;
+        reservedPlant = null;
     }
 
     private static bool ReadEditorAttackPressed()

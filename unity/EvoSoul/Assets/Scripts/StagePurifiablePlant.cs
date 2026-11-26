@@ -12,6 +12,8 @@ public sealed class StagePurifiablePlant : StageInteractionTarget
     [SerializeField, Min(0f)] private float recorruptionStandardDeviation = 30f;
     public override StageInteractionAction InteractionAction => StageInteractionAction.Attack;
     public string InteractionLabel => string.IsNullOrWhiteSpace(interactionLabel) ? "Golpear" : interactionLabel;
+    public GameObject CorruptedVisual => corruptedVisual;
+    public GameObject PurifiedVisual => purifiedVisual;
 
     public void Configure(GameObject corrupted, GameObject purified, string prompt = "Golpear")
     {

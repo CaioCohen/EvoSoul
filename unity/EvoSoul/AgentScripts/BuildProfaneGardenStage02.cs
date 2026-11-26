@@ -158,22 +158,19 @@ public static class BuildProfaneGardenStage02
         if (decor == null) return;
         foreach (var tree in decor.Cast<Transform>().Where(item => item.name.StartsWith("pg_tree")))
         {
-            foreach (var renderer in tree.GetComponentsInChildren<Renderer>(true)
-                .Where(item => item.name.IndexOf("TreeTrunk", StringComparison.OrdinalIgnoreCase) >= 0))
-            {
-                var collider = renderer.GetComponent<CapsuleCollider>();
-                if (collider == null) collider = renderer.gameObject.AddComponent<CapsuleCollider>();
-                var bounds = renderer.bounds;
-                var scale = renderer.transform.lossyScale;
-                float safeX = Mathf.Max(.0001f, Mathf.Abs(scale.x));
-                float safeY = Mathf.Max(.0001f, Mathf.Abs(scale.y));
-                float safeZ = Mathf.Max(.0001f, Mathf.Abs(scale.z));
-                collider.center = renderer.transform.InverseTransformPoint(bounds.center);
-                collider.direction = 1;
-                collider.height = Mathf.Max(.2f, bounds.size.y / safeY);
-                collider.radius = Mathf.Max(.05f, Mathf.Min(bounds.size.x / safeX, bounds.size.z / safeZ) * .32f);
-                collider.isTrigger = false;
-            }
+            foreach (var old in tree.GetComponentsInChildren<CapsuleCollider>(true))
+                UnityEngine.Object.DestroyImmediate(old);
+            var helper = tree.Find("TrunkCollision");
+            if (helper == null) { var go = new GameObject("TrunkCollision"); helper = go.transform; helper.SetParent(tree, false); }
+            helper.position = tree.position;
+            helper.rotation = Quaternion.identity;
+            var parentScale = tree.lossyScale;
+            helper.localScale = new Vector3(1f / Mathf.Max(.0001f, Mathf.Abs(parentScale.x)), 1f / Mathf.Max(.0001f, Mathf.Abs(parentScale.y)), 1f / Mathf.Max(.0001f, Mathf.Abs(parentScale.z)));
+            var collider = helper.gameObject.AddComponent<CapsuleCollider>();
+            collider.center = new Vector3(0f, 1.1f, 0f);
+            collider.height = 2.2f;
+            collider.radius = .42f;
+            collider.isTrigger = false;
         }
     }
 
